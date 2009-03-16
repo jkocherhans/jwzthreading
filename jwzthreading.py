@@ -16,28 +16,28 @@ __all__ = ['Message', 'make_message', 'thread']
 
 class Container:
     __slots__ = ['message', 'parent', 'children', 'id']
-    def __init__ (self):
+    def __init__(self):
         self.message = self.parent = None
         self.children = []
 
-    def __repr__ (self):
+    def __repr__(self):
         return '<%s %x: %r>' % (self.__class__.__name__, id(self),
                                 self.message)
 
-    def is_dummy (self):
+    def is_dummy(self):
         return self.message is None
 
-    def add_child (self, child):
+    def add_child(self, child):
         if child.parent:
             child.parent.remove_child(child)
         self.children.append(child)
         child.parent = self
 
-    def remove_child (self, child):
+    def remove_child(self, child):
         self.children.remove(child)
         child.parent = None
 
-    def has_descendant (self, ctr):
+    def has_descendant(self, ctr):
         if self is ctr:
             return True
         for c in self.children:
@@ -57,7 +57,7 @@ restrip_pat = re.compile("""(
 \s*)+
 """, re.I | re.VERBOSE)
 
-def make_message (msg):
+def make_message(msg):
     """make_message(msg:email.message.Message) : Message
     Create a Message object for threading purposes from an email
     message.
@@ -86,7 +86,7 @@ def make_message (msg):
 
     return new
 
-class Message (object):
+class Message(object):
     __slots__ = ['message', 'message_id', 'references', 'subject']
     
     def __init__(self, msg=None):
@@ -95,10 +95,10 @@ class Message (object):
         self.references = []
         self.subject = None
 
-    def __repr__ (self):
+    def __repr__(self):
         return '<%s: %r>' % (self.__class__.__name__, self.message_id)
 
-def prune_container (container):
+def prune_container(container):
     """prune_container(container:Container) : [Container]
     Recursively prune a tree of containers, as described in step 4
     of the algorithm.  Returns a list of the children that should replace
@@ -131,8 +131,8 @@ def prune_container (container):
         # Leave this node in place
         return [container]
 
-        
-def thread (msglist):
+
+def thread(msglist):
     """thread([Message]) : {string:Container}
 
     The main threading function.  This takes a list of Message
@@ -141,7 +141,7 @@ def thread (msglist):
     list of subtrees, so callers can then sort children by date or
     poster or whatever.
     """
-    
+
     id_table = {}
     for msg in msglist:
         # 1A
@@ -189,18 +189,18 @@ def thread (msglist):
     ##print 'before'
     ##for ctr in root_set:
     ##    print_container(ctr)
-        
+
     new_root_set = []
     for container in root_set:
         L = prune_container(container)
         new_root_set.extend(L)
 
     root_set = new_root_set
-    
+
     ##print '\n\nafter'
     ##for ctr in root_set:
     ##     print_container(ctr)
-        
+
     # 5. Group root set by subject
     subject_table = {}
     for container in root_set:
@@ -255,7 +255,7 @@ def thread (msglist):
             subject_table[subj] = new
 
     return subject_table
-        
+
 
 def print_container(ctr, depth=0, debug=0):
     import sys
@@ -270,10 +270,10 @@ def print_container(ctr, depth=0, debug=0):
     for c in ctr.children:
         print_container(c, depth+1)
 
-            
+
 def main():
     import mailbox
-    
+
     print 'Reading input file...'
     f = open("mbox")
     mbox = mailbox.UnixMailbox(f)
@@ -294,6 +294,6 @@ def main():
     L.sort()
     for subj, container in L:
         print_container(container)
-    
+
 if __name__ == "__main__":
     main()
