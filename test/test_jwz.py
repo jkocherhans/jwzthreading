@@ -4,14 +4,10 @@
 Test script for jwzthreading.
 
 """
-
 import unittest
-import jwzthreading, rfc822, StringIO
+import email
+import jwzthreading
 
-
-def make_rfc822_message (S):
-    input = StringIO.StringIO(S)
-    return rfc822.Message(input)
 
 class JWZTest(unittest.TestCase):
     def test_container(self):
@@ -44,7 +40,7 @@ Message-ID: %(msg_id)s
 
 Message body
 """
-        m = make_rfc822_message("""Subject: random
+        m = email.message_from_string("""Subject: random
 
 Body.""")
         self.assertRaises(ValueError, jwzthreading.make_message, m)

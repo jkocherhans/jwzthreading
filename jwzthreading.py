@@ -23,7 +23,7 @@ class Container:
     def __repr__ (self):
         return '<%s %x: %r>' % (self.__class__.__name__, id(self),
                                 self.message)
-    
+
     def is_dummy (self):
         return self.message is None
 
@@ -32,7 +32,7 @@ class Container:
             child.parent.remove_child(child)
         self.children.append(child)
         child.parent = self
-        
+
     def remove_child (self, child):
         self.children.remove(child)
         child.parent = None
@@ -46,7 +46,7 @@ class Container:
             elif c.has_descendant(ctr):
                 return True
         return False
-    
+
 def uniq(alist):
     set = {}
     return [set.setdefault(e,e) for e in alist if e not in set.keys()]
@@ -58,26 +58,26 @@ restrip_pat = re.compile("""(
 """, re.I | re.VERBOSE)
 
 def make_message (msg):
-    """make_message(msg:rfc822.Message) : Message
-    Create a Message object for threading purposes from an RFC822
+    """make_message(msg:email.message.Message) : Message
+    Create a Message object for threading purposes from an email
     message.
     """
     new = Message(msg)
     
-    m = msgid_pat.search(msg.getheader("Message-ID", ""))
+    m = msgid_pat.search(msg.get("Message-ID", ""))
     if m is None:
         raise ValueError, "Message does not contain a Message-ID: header"
 
     new.message_id = m.group(1)
 
     # Get list of unique message IDs from the References: header
-    refs = msg.getheader("References", "")
+    refs = msg.get("References", "")
     new.references = msgid_pat.findall(refs)
     new.references = uniq(new.references)
-    new.subject = msg.getheader('Subject', "No subject")
+    new.subject = msg.get('Subject', "No subject")
 
     # Get In-Reply-To: header and add it to references
-    in_reply_to = msg.getheader("In-Reply-To", "")
+    in_reply_to = msg.get("In-Reply-To", "")
     m = msgid_pat.search(in_reply_to)
     if m:
         msg_id = m.group(1)
